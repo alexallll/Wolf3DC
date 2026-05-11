@@ -10,6 +10,8 @@ add_executable(w3d_compiler
     src/compiler.cpp
     src/lexer.cpp
     src/parser.cpp
+    src/dos_support.cpp
+    src/android_support.cpp
 )
 
 # Включаемые директории
@@ -20,4 +22,16 @@ if(MSVC)
     target_compile_options(w3d_compiler PRIVATE /W4)
 else()
     target_compile_options(w3d_compiler PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
+# DOS специфичные флаги
+if(CMAKE_SYSTEM_NAME STREQUAL "DJGPP")
+    target_compile_options(w3d_compiler PRIVATE -m32)
+    target_link_options(w3d_compiler PRIVATE -m32)
+endif()
+
+# Android специфичные флаги
+if(ANDROID)
+    target_compile_definitions(w3d_compiler PRIVATE ANDROID_BUILD)
+    target_compile_definitions(w3d_compiler PRIVATE USE_OPENGL_ES)
 endif()
