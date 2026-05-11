@@ -1,123 +1,121 @@
 #include "android_support.h"
+#include <sstream>
 
 namespace AndroidSupport {
+
+std::string translateToAndroid(const std::string& dosCode) {
+    std::ostringstream output;
     
-    std::string translateToAndroid(const std::string& dosCode) {
-        std::string output;
-        
-        output += "// Android JNI Bridge\n";
-        output += "#include <jni.h>\n";
-        output += "#include <android/log.h>\n";
-        output += "#include <GLES2/gl2.h>\n\n";
-        
-        output += "#define LOG_TAG \"W3D\"\n";
-        output += "#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)\n";
-        output += "#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)\n";
-        output += "#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)\n\n";
-        
-        // Заменяем DOS функции на Android эквиваленты
-        output += "// DOS to Android mappings\n";
-        output += "typedef int (*dos_interrupt_handler)(int interrupt_num);\n";
-        output += "typedef void (*video_callback)();\n\n";
-        
-        // Добавляем JNI функции
-        output += "extern \"C\" {\n";
-        output += "    JNIEXPORT void JNICALL Java_com_w3d_Engine_nativeInit(JNIEnv* env, jobject obj);\n";
-        output += "    JNIEXPORT void JNICALL Java_com_w3d_Engine_nativeRender(JNIEnv* env, jobject obj);\n";
-        output += "    JNIEXPORT void JNICALL Java_com_w3d_Engine_nativeOnTouch(JNIEnv* env, jobject obj, jfloat x, jfloat y);\n";
-        output += "}\n\n";
-        
-        // Интегрируем оригинальный код
-        output += "// Original W3D code:\n";
-        output += dosCode;
-        
-        return output;
-    }
+    output << "/* Wolfenstein 3D Android - Auto-generated JNI code */\n";
+    output << "#include <jni.h>\n";
+    output << "#include <android/log.h>\n";
+    output << "#include <GLES2/gl2.h>\n\n";
     
-    std::string generateAndroidManifest(const AndroidConfig& config) {
-        std::string manifest;
-        
-        manifest += "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-        manifest += "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n";
-        manifest += "    package=\"" + config.packageName + "\">\n\n";
-        
-        manifest += "    <uses-permission android:name=\"android.permission.INTERNET\" />\n";
-        manifest += "    <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />\n\n";
-        
-        manifest += "    <application\n";
-        manifest += "        android:label=\"@string/app_name\">\n";
-        manifest += "        <activity\n";
-        manifest += "            android:name=\".MainActivity\"\n";
-        manifest += "            android:screenOrientation=\"landscape\">\n";
-        manifest += "            <intent-filter>\n";
-        manifest += "                <action android:name=\"android.intent.action.MAIN\" />\n";
-        manifest += "                <category android:name=\"android.intent.category.LAUNCHER\" />\n";
-        manifest += "            </intent-filter>\n";
-        manifest += "        </activity>\n";
-        manifest += "    </application>\n";
-        manifest += "</manifest>\n";
-        
-        return manifest;
-    }
+    output << "#define LOG_TAG \"W3D\"\n";
+    output << "#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)\n";
+    output << "#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)\n\n";
     
-    std::string generateJNI(const std::string& code) {
-        std::string jni;
-        
-        jni += "// Auto-generated JNI Bridge\n";
-        jni += "#include <jni.h>\n";
-        jni += "#include <android/log.h>\n\n";
-        
-        jni += "static bool initialized = false;\n\n";
-        
-        jni += "extern \"C\" {\n";
-        jni += "    JNIEXPORT void JNICALL\n";
-        jni += "    Java_com_w3d_Engine_nativeInit(JNIEnv* env, jobject obj) {\n";
-        jni += "        __android_log_print(ANDROID_LOG_INFO, \"W3D\", \"Initializing engine...\");\n";
-        jni += "        // Init code here\n";
-        jni += "        initialized = true;\n";
-        jni += "    }\n\n";
-        
-        jni += "    JNIEXPORT void JNICALL\n";
-        jni += "    Java_com_w3d_Engine_nativeRender(JNIEnv* env, jobject obj) {\n";
-        jni += "        if (initialized) {\n";
-        jni += "            // Render code here\n";
-        jni += "        }\n";
-        jni += "    }\n";
-        jni += "}\n";
-        
-        return jni;
-    }
+    output << dosCode;
     
-    std::string generateOpenGLES(const std::string& renderCode) {
-        std::string gles;
-        
-        gles += "#include <GLES2/gl2.h>\n";
-        gles += "#include <glm/glm.hpp>\n\n";
-        
-        gles += "// OpenGL ES 2.0 Shaders\n";
-        gles += "const char* vertexShaderSource = R\"(\n";
-        gles += "    #version 100\n";
-        gles += "    uniform mat4 projection;\n";
-        gles += "    attribute vec4 position;\n";
-        gles += "    void main() {\n";
-        gles += "        gl_Position = projection * position;\n";
-        gles += "    }\n";
-        gles += ")\";\n\n";
-        
-        gles += "const char* fragmentShaderSource = R\"(\n";
-        gles += "    #version 100\n";
-        gles += "    precision mediump float;\n";
-        gles += "    uniform sampler2D texture;\n";
-        gles += "    varying vec2 texCoord;\n";
-        gles += "    void main() {\n";
-        gles += "        gl_FragColor = texture2D(texture, texCoord);\n";
-        gles += "    }\n";
-        gles += ")\";\n";
-        
-        return gles;
-    }
-    
-    AndroidArch getDefaultArch() {
-        return AndroidArch::ARM64;
-    }
+    return output.str();
 }
+
+std::string generateAndroidManifest(const AndroidConfig& config) {
+    std::ostringstream manifest;
+    
+    manifest << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+    manifest << "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n";
+    manifest << "    package=\"" << config.packageName << "\"\n";
+    manifest << "    android:versionCode=\"1\"\n";
+    manifest << "    android:versionName=\"1.0\">\n\n";
+    
+    manifest << "    <uses-sdk\n";
+    manifest << "        android:minSdkVersion=\"" << config.minApiLevel << "\"\n";
+    manifest << "        android:targetSdkVersion=\"31\" />\n\n";
+    
+    manifest << "    <uses-permission android:name=\"android.permission.INTERNET\" />\n";
+    manifest << "    <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />\n\n";
+    
+    manifest << "    <uses-feature android:name=\"android.hardware.gamepad\" android:required=\"false\" />\n";
+    manifest << "    <uses-feature android:name=\"android.hardware.touchscreen\" />\n\n";
+    
+    manifest << "    <application\n";
+    manifest << "        android:allowBackup=\"true\"\n";
+    manifest << "        android:icon=\"@mipmap/ic_launcher\"\n";
+    manifest << "        android:label=\"" << config.appName << "\"\n";
+    manifest << "        android:supportsRtl=\"true\">\n\n";
+    
+    manifest << "        <activity android:name=\".MainActivity\"\n";
+    manifest << "            android:screenOrientation=\"landscape\"\n";
+    manifest << "            android:exported=\"true\">\n";
+    manifest << "            <intent-filter>\n";
+    manifest << "                <action android:name=\"android.intent.action.MAIN\" />\n";
+    manifest << "                <category android:name=\"android.intent.category.LAUNCHER\" />\n";
+    manifest << "            </intent-filter>\n";
+    manifest << "        </activity>\n\n";
+    
+    manifest << "    </application>\n\n";
+    manifest << "</manifest>\n";
+    
+    return manifest.str();
+}
+
+std::string generateJNI(const std::string& code) {
+    std::ostringstream jni;
+    
+    jni << "/* JNI Native Library */\n";
+    jni << "\nextern \"C\" {\n\n";
+    
+    jni << "JNIEXPORT void JNICALL\n";
+    jni << "Java_com_wolf3d_game_GameEngine_init(JNIEnv* env, jobject obj,\n";
+    jni << "                                      jint width, jint height) {\n";
+    jni << "    LOGI(\"GameEngine init: %dx%d\", width, height);\n";
+    jni << "}\n\n";
+    
+    jni << "JNIEXPORT void JNICALL\n";
+    jni << "Java_com_wolf3d_game_GameEngine_render(JNIEnv* env, jobject obj) {\n";
+    jni << "    // Render game frame\n";
+    jni << "}\n\n";
+    
+    jni << "JNIEXPORT void JNICALL\n";
+    jni << "Java_com_wolf3d_game_GameEngine_destroy(JNIEnv* env, jobject obj) {\n";
+    jni << "    LOGI(\"GameEngine destroyed\");\n";
+    jni << "}\n\n";
+    
+    jni << "}\n";
+    
+    return jni.str();
+}
+
+std::string generateOpenGLES(const std::string& renderCode) {
+    std::ostringstream gles;
+    
+    gles << "/* OpenGL ES 2.0 Renderer */\n";
+    gles << "\n#ifdef USE_OPENGL_ES\n";
+    gles << "static GLuint shaderProgram;\n";
+    gles << "static GLuint vertexBuffer;\n";
+    gles << "static GLuint indexBuffer;\n\n";
+    
+    gles << "void initOpenGLES() {\n";
+    gles << "    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);\n";
+    gles << "    glEnable(GL_DEPTH_TEST);\n";
+    gles << "    glEnable(GL_CULL_FACE);\n";
+    gles << "}\n\n";
+    
+    gles << "void renderOpenGLES() {\n";
+    gles << "    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);\n";
+    gles << "    glUseProgram(shaderProgram);\n";
+    gles << "    // Render geometry\n";
+    gles << "}\n\n";
+    
+    gles << "#endif\n";
+    
+    return gles.str();
+}
+
+AndroidArch getDefaultArch() {
+    // На практике определяется архитектурой хоста
+    return AndroidArch::ARM64;
+}
+
+} // namespace AndroidSupport
