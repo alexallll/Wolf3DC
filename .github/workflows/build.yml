@@ -25,7 +25,7 @@ jobs:
       run: cd build && make
     
     - name: Upload Linux artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: w3d_compiler-linux
         path: build/w3d_compiler
@@ -45,7 +45,7 @@ jobs:
       run: cd build && cmake --build . --config Release
     
     - name: Upload Windows artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: w3d_compiler-windows
         path: build/Release/w3d_compiler.exe
@@ -65,7 +65,7 @@ jobs:
       run: cd build && make
     
     - name: Upload macOS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: w3d_compiler-macos
         path: build/w3d_compiler
@@ -99,7 +99,7 @@ jobs:
       run: cd build-dos && make
     
     - name: Upload DOS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: w3d_compiler-dos
         path: build-dos/w3d_compiler.exe
@@ -172,25 +172,25 @@ jobs:
       run: cd build-android-x86_64 && make
     
     - name: Upload Android ARM artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: w3d_compiler-android-arm
         path: build-android-arm/w3d_compiler
     
     - name: Upload Android ARM64 artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: w3d_compiler-android-arm64
         path: build-android-arm64/w3d_compiler
     
     - name: Upload Android x86 artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: w3d_compiler-android-x86
         path: build-android-x86/w3d_compiler
     
     - name: Upload Android x86_64 artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: w3d_compiler-android-x86_64
         path: build-android-x86_64/w3d_compiler
