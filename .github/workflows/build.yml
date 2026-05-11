@@ -1,0 +1,196 @@
+name: Build W3D Compiler (Linux, Windows, macOS)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y cmake build-essential
+    
+    - name: Create build directory
+      run: mkdir build
+    
+    - name: Configure CMake
+      run: cd build && cmake ..
+    
+    - name: Build
+      run: cd build && make
+    
+    - name: Upload Linux artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: w3d_compiler-linux
+        path: build/w3d_compiler
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Create build directory
+      run: mkdir build
+    
+    - name: Configure CMake
+      run: cd build && cmake .. -G "Visual Studio 17 2022"
+    
+    - name: Build
+      run: cd build && cmake --build . --config Release
+    
+    - name: Upload Windows artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: w3d_compiler-windows
+        path: build/Release/w3d_compiler.exe
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Create build directory
+      run: mkdir build
+    
+    - name: Configure CMake
+      run: cd build && cmake ..
+    
+    - name: Build
+      run: cd build && make
+    
+    - name: Upload macOS artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: w3d_compiler-macos
+        path: build/w3d_compiler
+
+  build-dos:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install DOS build tools
+      run: |
+        apt-get update
+        apt-get install -y cmake build-essential \
+          watcom-v2-ow-packages watcom-v2-ow \
+          djgpp djgpp-base djgpp-gcc djgpp-g++
+    
+    - name: Setup DOS environment
+      run: |
+        export DJGPP=/usr/share/djgpp/djgpp.env
+        export PATH=$PATH:/usr/bin/djgpp
+    
+    - name: Create DOS build directory
+      run: mkdir build-dos
+    
+    - name: Configure for DOS (Real Mode)
+      run: cd build-dos && cmake .. -DCMAKE_SYSTEM_NAME=DJGPP -DCMAKE_FIND_ROOT_PATH=/usr/djgpp
+    
+    - name: Build DOS version
+      run: cd build-dos && make
+    
+    - name: Upload DOS artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: w3d_compiler-dos
+        path: build-dos/w3d_compiler.exe
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Android NDK
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r23c
+        add-to-path: true
+    
+    - name: Install Android tools
+      run: |
+        apt-get update
+        apt-get install -y cmake build-essential openjdk-11-jdk
+    
+    - name: Create Android build directories
+      run: |
+        mkdir -p build-android-arm
+        mkdir -p build-android-arm64
+        mkdir -p build-android-x86
+        mkdir -p build-android-x86_64
+    
+    - name: Configure for Android ARM
+      run: |
+        cd build-android-arm
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.cmake \
+          -DANDROID_ABI=armeabi-v7a \
+          -DANDROID_PLATFORM=android-21 \
+          -DCMAKE_BUILD_TYPE=Release
+    
+    - name: Configure for Android ARM64
+      run: |
+        cd build-android-arm64
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.cmake \
+          -DANDROID_ABI=arm64-v8a \
+          -DANDROID_PLATFORM=android-21 \
+          -DCMAKE_BUILD_TYPE=Release
+    
+    - name: Configure for Android x86
+      run: |
+        cd build-android-x86
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.cmake \
+          -DANDROID_ABI=x86 \
+          -DANDROID_PLATFORM=android-21 \
+          -DCMAKE_BUILD_TYPE=Release
+    
+    - name: Configure for Android x86_64
+      run: |
+        cd build-android-x86_64
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.cmake \
+          -DANDROID_ABI=x86_64 \
+          -DANDROID_PLATFORM=android-21 \
+          -DCMAKE_BUILD_TYPE=Release
+    
+    - name: Build Android ARM
+      run: cd build-android-arm && make
+    
+    - name: Build Android ARM64
+      run: cd build-android-arm64 && make
+    
+    - name: Build Android x86
+      run: cd build-android-x86 && make
+    
+    - name: Build Android x86_64
+      run: cd build-android-x86_64 && make
+    
+    - name: Upload Android ARM artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: w3d_compiler-android-arm
+        path: build-android-arm/w3d_compiler
+    
+    - name: Upload Android ARM64 artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: w3d_compiler-android-arm64
+        path: build-android-arm64/w3d_compiler
+    
+    - name: Upload Android x86 artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: w3d_compiler-android-x86
+        path: build-android-x86/w3d_compiler
+    
+    - name: Upload Android x86_64 artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: w3d_compiler-android-x86_64
+        path: build-android-x86_64/w3d_compiler
